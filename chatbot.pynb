@@ -1,0 +1,165 @@
+import numpy as np
+import pandas as pd
+
+my={}
+my["yojna"]="scheme"
+my["yojana"]="scheme"
+my["awas"]="home"
+my["bima"]="insurance"
+my["jeevan"]="life"
+my["rashtriya"]="national"
+my["rojgar"]="employement"
+my["pm"]="pradhan mantri"
+my["crop"]="fasal"
+my["life"]="jeevan"
+
+def convo(q):
+    r=np.array(q)
+    for i in range(0,q.shape[0]):
+        if q[i] in my:
+            r[i]=my[q[i]]
+        else:
+            r[i]=q[i]
+    return r
+
+ma={"purpose":"nature",
+   "objective":"nature",
+   "introduction":"nature",
+   "perks":"benefit",
+   "benefits":"benefit",
+   "eligible":"eligibility",
+   "enroll": "apply",
+    "benefitted":"benefit"
+   }
+def convo2(q):
+    r=np.array(q)
+    for i in range(0,q.shape[0]):
+        if q[i] in ma:
+            r[i]=ma[q[i]]
+        else:
+            r[i]=q[i]
+    return r
+
+def chatbot_fun(tr):
+    scheme=["Stand Up India buissness","Scheme For Liberation and Rehabilitation of Scavenger","Rashtriya Swasthya Bima Yojana","Prime Ministers Rozgar Yojana","Pradhan Mantri Mudra Yojana","Pradhan Mantri Jan-Dhan Yojana","pradhan mantri jan arogya","Pradhan Mantri Suraksh Bima Yojna", "Pradhan Mantri Awas Yojana","Aam admi bima yojana","Atal Pension Yojana","Employment State Insurance Scheme","genaral home loan","general Insurance","National Pension System","National Social Assistance Programme insurance","Pradhan Mantri Fasal Bima Yojana","Pradhan Mantri Jeevan Jyoti BIMA Yojana","Pradhan Mantri Vaya Vandana Yojana","Varishtha Pension bima yojana","vida lakshmi yojana"]
+    CSV=["Stand Up India buissness SUPI business loan for backward","Scheme For Liberation and Rehabilitation of Scavenger SFLAR house loan","Rashtriya Swasthya Bima Yojana RSBY health insurance","Prime Ministers Rozgar Yojana  PMRY buissness loan","Pradhan Mantri Mudra Yojana PMMY  small business loan","Pradhan Mantri Jan-Dhan Yojana PMJDY  accidental and death insurance","pradhan mantri jan arogya PMJA health insurance","Pradhan Mantri Suraksh Bima Yojna PMSBY Health insurance", "Pradhan Mantri Awas Yojana PMAY Home loan","Aam admi bima yojana  AABY accident disablity death insurance","Atal Pension Yojana APY pension scheme","Employment State Insurance Scheme ESISHI health insurance","genaral home loan faq","general Insurance faq","National Pension System  senior citizen insurance NPS","National Social Assistance Programme insurance  NSAP","Pradhan Mantri Fasal Bima Yojana PMFBY Agriculture crop insurance","Pradhan Mantri Jeevan Jyoti BIMA Yojana PMJJBY life insurance","Pradhan Mantri Vaya Vandana Yojana PMVVY pension schme insurance","Varishtha Pension bima yojana pension insurance VPBY","vida lakshmi yojana VLY education loan"]
+    X=pd.read_csv("foo.csv")
+    X=np.array(X)
+    import nltk
+
+    dic=np.array(scheme)
+
+    ex=""
+    for i in range(0,dic.shape[0]):
+        ex=ex+dic[i]+" "
+
+    ex=str.lower(ex)
+    from nltk.tokenize import word_tokenize
+
+    ex = word_tokenize(ex)
+
+    ex=np.unique(ex)
+    ex=np.reshape(ex,(1,51))
+
+
+    sho=np.zeros((dic.shape[0],51))
+    for i in range(0,dic.shape[0]):
+        q=""
+        q=q+dic[i]+""
+        q=str.lower(q)
+        q = word_tokenize(q)
+        q=np.array(q)
+        for j in range(0,ex.shape[1]):
+            if ex[0][j] in convo(q):
+                sho[i][j]=1
+
+    
+    tr1=tr
+    tr=str.lower(tr)
+    from nltk.corpus import stopwords
+    stop_words = set(stopwords.words('english'))
+
+    word_tokens = word_tokenize(tr)
+
+    
+
+    filtered_sentence = []
+
+    for w in word_tokens:
+        if w not in stop_words:
+            filtered_sentence.append(w)
+    tr=np.array(filtered_sentence)
+
+    one =np.zeros((ex.shape))
+    for i in range(0,ex.shape[1]):
+        if ex[0][i] in convo(tr):
+            one[0][i]=1
+    w=(sho*one)/(np.sum(sho,axis=1,keepdims=True))
+
+    w=np.sum(w,axis=1,keepdims=True)
+    id=np.argmax(w)
+
+    file=CSV[id]
+    file=file+".csv"
+
+    Z=pd.read_csv(file)
+    tr1 = word_tokenize(tr1)
+
+
+    #filtered_sentence = [w for w in word_tokens if not w in stop_words]
+
+    filtered_sentence = []
+
+    for w in word_tokens:
+        if w not in stop_words:
+            filtered_sentence.append(w)
+    tr1=np.array(filtered_sentence)
+    tr1=convo(tr1)
+    sz=ex.shape[1]-1
+    fl=[]
+    c=0
+    for i in range(0,len(tr1)):
+        for j in range(0,ex.shape[1]):
+            if tr1[i]==ex[0][j]:
+                break
+        if j==sz:
+            fl.insert(c,tr1[i])
+            c=c+1
+    dic2=""
+    Z=np.array(Z)
+    for i in range(0,Z.shape[0]):
+        dic2=dic2+Z[i][0]+" "
+    dic2=str.lower(dic2)
+    dic2=word_tokenize(dic2)
+
+    filtered_sentence = [w for w in word_tokens if not w in stop_words]
+
+    filtered_sentence = []
+
+    for w in dic2:
+        if w not in stop_words:
+            filtered_sentence.append(w)
+    dic2=np.array(filtered_sentence)
+    dic2=np.reshape(dic2,(1,dic2.shape[0]))
+
+    sho1=np.zeros((Z.shape[0],dic2.shape[1]))
+    for i in range(0,Z.shape[0]):
+        q=""
+        q=q+Z[i][0]+""
+        q=str.lower(q)
+        q = word_tokenize(q)
+        q=np.array(q)
+        for j in range(0,dic2.shape[1]):
+            if dic2[0][j] in convo2(q):
+                sho1[i][j]=1
+    fl=np.array(fl)
+    oh = np.zeros((dic2.shape))
+    for i in range(0,dic2.shape[1]):
+        if dic2[0][i] in convo2(fl):
+            oh[0][i]=1
+    w1=(sho1*oh)/(np.sum(sho1,axis=1,keepdims=True))
+    w1=np.sum(w1,axis=1,keepdims=True)
+    idx=np.argmax(w1)
+    return (Z[idx][1])
+sh=input()
+print(chatbot_fun(sh))
